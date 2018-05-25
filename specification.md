@@ -11,8 +11,9 @@ Covers the command line interface and output format.
 
 # Use Cases
 
-|| Who || What || How || Result ||
-| programmer | Retrieve timeline for an application | Run the command line program and pass the application name as an argument. | A. Success - csv written to standard out. Exit code 0. B. Failure - Error written to standard error. Exit code 4. |
+| Who | What | How | Result |
+| --- | --- | --- | --- |
+| programmer | Retrieve timeline for an application | Run the command line program and pass the application name as an argument. | A. *Success* - csv written to standard out. Exit code 0.<br/> B. *Failure* - Error written to standard error. Exit code 4. |
 | programmer | View program help | Run the command line program with no arguments or with --help | Displays brief description and usage. |
 
 # Assumptions
