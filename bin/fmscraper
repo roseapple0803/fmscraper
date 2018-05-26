@@ -1,10 +1,46 @@
 #!/usr/bin/env python3
 
+from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import argparse
+import csv
+import sys
+
+def writecsv(releases, separator):
+    fieldnames = ['version', 'timestamp', 'note']
+    writer = csv.DictWriter(sys.stdout, fieldnames=fieldnames, delimiter=separator)
+    writer.writeheader()
+    for release in releases:
+        writer.writerow(release)
+
+def scrape(application):
+    quote_page = "http://freshmeat.sourceforge.net/projects/" + application
+    # query the website and return the html to the variable ‘page’
+    page = urlopen(quote_page)
+    # parse the html using beautiful soup and store in variable `soup`
+    #soup = BeautifulSoup(page, ‘html.parser’)
+    soup = BeautifulSoup(page, "html.parser")
+    boo = soup.find('div', attrs={'class': 'recent-releases'})
+    #print(boo.prettify())
+    children = boo.find_all("div", {} ,recursive=False)
+    releases = []
+    for child in children:
+        #print("------")
+        version = child.find('li', {'class': 'release'}).find('a').text
+        rdateString = child.find('li', {'class': 'rdate'}).text
+        note = child.find('p', {'class': 'truncate changes'}).text
+        #print(version)
+        #print(rdateString)
+        #print(note)
+        #print("******")
+        releases.append({"version" : version.strip(), "timestamp" : rdateString.strip(), "note" : note.strip()})
+        #print(child.prettify())
+    return releases
 
 def main(args):
-    print("Hello from main.")
+    releases = scrape(args.application)
+    writecsv(releases, args.separator)
+
 
 parser = argparse.ArgumentParser(description='''
     Freshmeat.net screen scraper retrieves software release timeline
@@ -14,33 +50,8 @@ parser = argparse.ArgumentParser(description='''
     release and the release notes associated with the release.
     ''',
     formatter_class=lambda prog: argparse.HelpFormatter(prog,max_help_position=50))
-
 parser.add_argument("-s","--separator", choices=['|','#'],  help="CSV field separator (default is ',')", default=",")
-
 parser.add_argument("application", help="Retrive timeline for this application")
-
-
-
 
 args = parser.parse_args()
 main(args)
-
-def example1():
-    html_doc = """
-    <html><head><title>The Dormouse's story</title></head>
-    <body>
-    <p class="title"><b>The Dormouse's story</b></p>
-
-    <p class="story">Once upon a time there were three little sisters; and their names were
-    <a href="http://example.com/elsie" class="sister" id="link1">Elsie</a>,
-    <a href="http://example.com/lacie" class="sister" id="link2">Lacie</a> and
-    <a href="http://example.com/tillie" class="sister" id="link3">Tillie</a>;
-    and they lived at the bottom of a well.</p>
-
-    <p class="story">...</p>
-    """
-
-
-
-    soup = BeautifulSoup(html_doc, 'html.parser')
-    print(soup.prettify())
